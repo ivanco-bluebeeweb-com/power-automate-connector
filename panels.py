@@ -99,18 +99,32 @@ def _connect_section() -> ui.UINode:
             action="connect_power_automate",
             submit_label="Verify and connect",
             children=[
-                ui.Input(param_name="tenant_id", label="Azure AD tenant ID",
-                          placeholder="Azure AD tenant ID"),
-                ui.Input(param_name="client_id", label="App Registration client ID",
-                          placeholder="App Registration client ID"),
-                ui.Password(param_name="client_secret", label="App Registration client secret",
-                             placeholder="App Registration client secret"),
-                ui.Input(param_name="environment_url", label="Environment URL",
-                          placeholder="https://org12345.crm.dynamics.com"),
-                ui.Input(param_name="environment_id", label="Environment ID",
-                          placeholder="Environment ID (GUID)"),
-                ui.Input(param_name="label", label="Label (optional)",
-                          placeholder="e.g. Production"),
+                ui.Stack(direction="v", gap=1, children=[
+                    ui.Text("Azure AD tenant ID", variant="caption"),
+                    ui.Input(param_name="tenant_id", placeholder="Azure AD tenant ID"),
+                ]),
+                ui.Stack(direction="v", gap=1, children=[
+                    ui.Text("App Registration client ID", variant="caption"),
+                    ui.Input(param_name="client_id", placeholder="App Registration client ID"),
+                ]),
+                ui.Stack(direction="v", gap=1, children=[
+                    ui.Text("App Registration client secret", variant="caption"),
+                    ui.Password(param_name="client_secret",
+                                 placeholder="App Registration client secret"),
+                ]),
+                ui.Stack(direction="v", gap=1, children=[
+                    ui.Text("Environment URL", variant="caption"),
+                    ui.Input(param_name="environment_url",
+                              placeholder="https://org12345.crm.dynamics.com"),
+                ]),
+                ui.Stack(direction="v", gap=1, children=[
+                    ui.Text("Environment ID", variant="caption"),
+                    ui.Input(param_name="environment_id", placeholder="Environment ID (GUID)"),
+                ]),
+                ui.Stack(direction="v", gap=1, children=[
+                    ui.Text("Label (optional)", variant="caption"),
+                    ui.Input(param_name="label", placeholder="e.g. Production"),
+                ]),
             ],
         ),
     ])
