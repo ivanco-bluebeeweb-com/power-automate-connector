@@ -81,17 +81,12 @@ def _flows_section(flows: list) -> ui.UINode:
 
 def _connect_section() -> ui.UINode:
     """Plain content, no Card wrapper. Stretched full-width per
-    UI_INTERFACE_STANDARD.md (2026-08-20); the \"Solution-aware flows
-    only\" limitation lives ONLY in power_automate_connect_help's modal
-    now -- repeating it here would duplicate that instruction."""
+    UI_INTERFACE_STANDARD.md (2026-08-20). No intro heading/description
+    text here -- the \"Solution-aware flows only\" limitation and the
+    Azure AD explanation live ONLY in power_automate_connect_help's modal
+    (button below opens it); repeating them here would duplicate that
+    instruction."""
     return ui.Stack(direction="v", gap=3, align="stretch", children=[
-        ui.Text("Connect Power Automate", variant="heading"),
-        ui.Text(
-            "This connects to your Dataverse environment via your own "
-            "Azure AD App Registration -- Imperal never sees or stores "
-            "your Microsoft account password.",
-            variant="caption",
-        ),
         ui.Button("How do I set this up?", variant="ghost", size="sm",
                   icon="HelpCircle",
                   on_click=ui.Call("__panel__power_automate_connect_help")),
@@ -143,11 +138,6 @@ async def power_automate_connect_panel(ctx, **kwargs) -> object:
         return ui.Stack(direction="v", gap=4, align="stretch", children=[
             header,
             _connect_section(),
-            ui.Alert(
-                title="Not connected yet",
-                message="Connect a Power Platform environment to see and manage its cloud flows.",
-                type="info",
-            ),
             ui.Divider(),
             _settings_button(),
         ])
