@@ -349,7 +349,7 @@ async def update_flow(ctx, params: UpdateFlowParams) -> ActionResult:
 @chat.function(
     "delete_flow",
     "Permanently delete a cloud flow from Dataverse. Cannot be undone.",
-    action_type="write",
+    action_type="destructive",
     chain_callable=True,
     data_model=DeleteResult,
     event="power-automate-connector.delete_flow",
@@ -568,7 +568,7 @@ async def bulk_set_flow_state(ctx, params: BulkSetFlowStateParams) -> ActionResu
     "convenience this connector adds on top of Microsoft's API, which has "
     "no native bulk-delete endpoint. Deletes each workflow_id in turn and "
     "reports success/failure per item. This cannot be undone.",
-    action_type="write",
+    action_type="destructive",
     chain_callable=True,
     data_model=BulkFlowResult,
     event="power-automate-connector.bulk_delete_flows",
