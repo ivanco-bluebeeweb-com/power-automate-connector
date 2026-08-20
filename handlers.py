@@ -151,7 +151,15 @@ async def connect_power_automate(ctx, params: ConnectPowerAutomateParams) -> Act
         return ActionResult.error(check["error"], code=check["error_code"], retryable=check.get("retryable", False))
 
     connections = await _load_connections(ctx)
-    conn_id = str(uuid.uuid4())
+    # Reconnecting the SAME environment (e.g. after rotating the client
+    # secret) must replace the existing record, not add a second one --
+    # two divergent copies of the same environment_url would make
+    # _resolve_connection's no-connection_id single-match shortcut
+    # ambiguous and silently break every later call. Matched by
+    # environment_url (the real-world identity of "this environment"),
+    # keeping the existing record's id stable for any external reference.
+    existing = next((c for c in connections if c.get("environment_url") == environment_url), None)
+    conn_id = existing["id"] if existing else str(uuid.uuid4())
     record = {
         "id": conn_id,
         "label": params.label.strip() or environment_url,
@@ -161,6 +169,7 @@ async def connect_power_automate(ctx, params: ConnectPowerAutomateParams) -> Act
         "environment_url": environment_url,
         "environment_id": environment_id,
     }
+    connections = [c for c in connections if c.get("environment_url") != environment_url]
     connections.append(record)
     await _save_connections(ctx, connections)
     return ActionResult.success(

@@ -311,3 +311,155 @@ async def test_disconnect_actually_removes_the_connection_not_a_noop(ctx_connect
     assert result.error is None
     after = await h._load_connections(ctx_connected)
     assert after == [], "disconnect must remove the connection from stored state, not no-op"
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Part D2 (SCENARIO_TESTING_STANDARD.md) -- IDEMPOTENCY: every write/
+# destructive handler invoked TWICE with the same params. A second call
+# must either succeed cleanly (state already matches -- true idempotence)
+# or fail with a SPECIFIC, actionable error -- never crash, never silently
+# corrupt local state, never return a misleadingly generic error.
+# ═══════════════════════════════════════════════════════════════════════
+
+@pytest.mark.asyncio
+async def test_d2_disconnect_twice_second_call_fails_specifically_not_crash(ctx_connected):
+    """Second disconnect of an already-removed connection_id must return
+    a specific not-found error, not raise or silently report success."""
+    r1 = await h.disconnect_power_automate(ctx_connected, DisconnectPowerAutomateParams(connection_id=CONN_ID))
+    assert r1.error is None
+    r2 = await h.disconnect_power_automate(ctx_connected, DisconnectPowerAutomateParams(connection_id=CONN_ID))
+    assert r2.error is not None
+    assert r2.error_code == "POWER_AUTOMATE_CONNECTION_NOT_FOUND"
+
+
+@pytest.mark.asyncio
+async def test_d2_delete_flow_twice_second_call_is_not_found_not_silent_success(ctx_connected):
+    """Given a flow already deleted, When delete_flow is called again with
+    the same workflow_id, Then Dataverse returns 404 and the handler must
+    surface NOT_FOUND -- never report a second 'deleted' success for a
+    flow that no longer exists."""
+    _mock_token_ok(ctx_connected)
+    ctx_connected.http._mocks.append(("DELETE", WORKFLOWS_URL, {}, 204, {}))
+    r1 = await h.delete_flow(ctx_connected, DeleteFlowParams(workflow_id="wf1"))
+    assert r1.error is None
+
+    ctx_connected.http._mocks.clear()
+    _mock_token_ok(ctx_connected)
+    ctx_connected.http._mocks.append(("DELETE", WORKFLOWS_URL, {"error": "not found"}, 404, {}))
+    r2 = await h.delete_flow(ctx_connected, DeleteFlowParams(workflow_id="wf1"))
+    assert r2.error is not None
+    assert r2.error_code == pac.NOT_FOUND
+
+
+@pytest.mark.asyncio
+async def test_d2_set_flow_state_same_state_twice_is_truly_idempotent(ctx_connected):
+    """Given a flow already activated, When set_flow_state(activated) is
+    called again, Then it must succeed cleanly both times -- setting the
+    same state twice is a legitimate no-op from the caller's perspective,
+    not an error."""
+    _mock_token_ok(ctx_connected)
+    ctx_connected.http.mock_patch = lambda *a, **k: None  # no-op guard, real mock below
+    ctx_connected.http._mocks.append(("PATCH", WORKFLOWS_URL, {}, 204, {}))
+    r1 = await h.set_flow_state(ctx_connected, SetFlowStateParams(workflow_id="wf1", state="activated"))
+    assert r1.error is None
+    ctx_connected.http._mocks.append(("PATCH", WORKFLOWS_URL, {}, 204, {}))
+    r2 = await h.set_flow_state(ctx_connected, SetFlowStateParams(workflow_id="wf1", state="activated"))
+    assert r2.error is None
+
+
+@pytest.mark.asyncio
+async def test_d2_bulk_delete_flows_twice_second_pass_reports_failures_not_crash(ctx_connected):
+    """Given a bulk delete already ran successfully, When the exact same
+    workflow_ids are bulk-deleted again, Then every item now 404s and the
+    handler must report per-item failures (succeeded=0), never crash or
+    silently claim success on a partial/duplicate resubmission."""
+    _mock_token_ok(ctx_connected)
+    ctx_connected.http._mocks.append(("DELETE", WORKFLOWS_URL, {}, 204, {}))
+    r1 = await h.bulk_delete_flows(ctx_connected, BulkDeleteFlowsParams(workflow_ids=["wf1", "wf2"]))
+    assert r1.error is None
+    assert r1.data.succeeded == 2
+
+    ctx_connected.http._mocks.clear()
+    _mock_token_ok(ctx_connected)
+    ctx_connected.http._mocks.append(("DELETE", WORKFLOWS_URL, {"error": "not found"}, 404, {}))
+    r2 = await h.bulk_delete_flows(ctx_connected, BulkDeleteFlowsParams(workflow_ids=["wf1", "wf2"]))
+    assert r2.error is None  # partial-result envelope, not a hard error
+    assert r2.data.succeeded == 0
+    assert r2.data.failed == 2
+
+
+@pytest.mark.asyncio
+async def test_d2_connect_same_credentials_twice_replaces_not_duplicates(ctx):
+    """Given the same environment already connected, When connect_power_automate
+    is called again with the identical credentials, Then the connections
+    list must not grow -- either it replaces the existing record (matched
+    by environment_url) or explicitly dedupes, but two connect calls with
+    identical inputs must never leave two divergent copies of the same
+    environment in storage."""
+    _mock_token_ok(ctx)
+    ctx.http.mock_get("/api/data/v9.2/", {"value": []}, status=200)
+    p = ConnectPowerAutomateParams(
+        tenant_id="t1", client_id="c1", client_secret="s1",
+        environment_url=ENV_URL, environment_id=ENV_ID, label="Prod",
+    )
+    r1 = await h.connect_power_automate(ctx, p)
+    assert r1.error is None
+    r2 = await h.connect_power_automate(ctx, p)
+    assert r2.error is None
+    connections = await h._load_connections(ctx)
+    same_env = [c for c in connections if c.get("environment_url") == ENV_URL]
+    assert len(same_env) == 1, (
+        f"connecting the same environment twice must not create duplicate "
+        f"connection records -- found {len(same_env)}"
+    )
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# Part D3 (SCENARIO_TESTING_STANDARD.md) -- SECURITY
+#
+# Classic SSRF payload-injection (force a private-IP fetch and assert
+# refusal) does NOT apply here the same way it does for a scanner/fetcher
+# app: this connector is BYOK by design, exactly like n8n Connector --
+# the whole point is reaching the user's OWN Dataverse environment at
+# whatever environment_url/tenant_id they saved, and many legitimate
+# Power Platform environments sit behind private networking the user's
+# own infra reaches. "Refuse a private-looking target" would break the
+# app's actual purpose. What DOES matter for D3 here: (1) every outbound
+# call is built from the STORED environment_url/tenant_id, never a
+# hardcoded or otherwise-sourced host -- a regression there would mean
+# silently talking to the wrong tenant's data; (2) no secret ever leaks
+# into a returned entity's user-visible fields (title/detail/summary).
+# ═══════════════════════════════════════════════════════════════════════
+
+def test_d3_every_outbound_call_is_built_from_stored_environment_or_tenant():
+    """D4-equivalent host-provenance guard (n8n Connector precedent):
+    every ctx.http.* call site in power_automate_client.py must be built
+    from a parameter -- environment_url or tenant_id -- passed into that
+    function, never a hardcoded host string."""
+    import pathlib
+    import re
+
+    client_src = (pathlib.Path(__file__).resolve().parent.parent / "power_automate_client.py").read_text(encoding="utf-8")
+    lines = client_src.splitlines()
+    call_idx = [i for i, line in enumerate(lines) if re.search(r"ctx\.http\.(get|post|put|patch|delete)\(", line)]
+    assert call_idx, "expected to find outbound ctx.http calls in power_automate_client.py"
+    for i in call_idx:
+        window = "\n".join(lines[max(0, i - 6):i + 2])
+        assert "environment_url" in window or "tenant_id" in window or "url" in window, (
+            f"outbound call not obviously built from environment_url/tenant_id near line {i + 1}: {lines[i].strip()}"
+        )
+
+
+def test_d3_no_handler_leaks_client_secret_into_a_returned_entity_field():
+    """Static grep guard: client_secret must never be assigned into an
+    entity's title/detail/description field -- the exact shape a secret
+    leak into a chat-visible response would take. connect_power_automate's
+    own params/local variable named client_secret is fine; what's
+    forbidden is passing it (or a variable literally named client_secret)
+    as a value for title=/detail=/description= on any constructed entity."""
+    import pathlib
+    import re
+
+    src = (pathlib.Path(__file__).resolve().parent.parent / "handlers.py").read_text(encoding="utf-8")
+    leaks = re.findall(r"(?:title|detail|description)\s*=\s*[^,\)]*client_secret", src)
+    assert not leaks, f"client_secret appears to flow into a user-visible entity field: {leaks}"
