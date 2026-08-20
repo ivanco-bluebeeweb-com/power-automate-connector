@@ -1,0 +1,2468 @@
+{
+  "manifest_schema_version": 3,
+  "sdk_version": "5.9.22",
+  "app_id": "power-automate-connector",
+  "version": "0.1.0",
+  "name": "Power Automate",
+  "description": "Connect your own Power Platform environment (Dataverse) to see and manage your Power Automate cloud flows from Imperal -- list flows with their status, create/update/delete them, turn them on or off, inspect and cancel/resubmit their runs, and run bulk operations across many flows at once. Uses your own Azure AD App Registration (Application User) -- nothing is hosted or proxied by Imperal beyond the request itself. Note: this connects to flows added to a Dataverse Solution; personal \"My Flows\" not added to a Solution are not reachable by Microsoft's own management API and are out of scope here.",
+  "icon": "icon.svg",
+  "actions_explicit": true,
+  "system": false,
+  "capabilities": [
+    "power-automate:read",
+    "power-automate:write"
+  ],
+  "tools": [
+    {
+      "name": "connect_power_automate",
+      "description": "Connect a Microsoft Power Platform environment by saving your Azure AD App Registration credentials (tenant_id, client_id, client_secret) and your Dataverse environment_url/environment_id, after checking they actually work together. You'll need: an Azure AD App Registration (Azure Portal > Microsoft Entra ID > App registrations), a client secret created under Certificates & secrets, and that app registered as an Application User in your Power Platform environment with a security role granting workflow privileges. Note: this only manages Solution-aware cloud flows -- personal unattached \"My Flows\" are not supported by Microsoft's own Web API and are out of scope here.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.provider.connected"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "tenant_id": {
+            "default": "",
+            "description": "Azure AD (Microsoft Entra ID) tenant ID that owns your Power Platform environment.",
+            "title": "Tenant Id",
+            "type": "string"
+          },
+          "client_id": {
+            "default": "",
+            "description": "Application (client) ID of the Azure AD App Registration created for this connection.",
+            "title": "Client Id",
+            "type": "string"
+          },
+          "client_secret": {
+            "default": "",
+            "description": "Client secret value of the Azure AD App Registration. Create it under Certificates & secrets.",
+            "title": "Client Secret",
+            "type": "string"
+          },
+          "environment_url": {
+            "default": "",
+            "description": "Your Dataverse environment URL, e.g. https://org12345.crm.dynamics.com. Found in the Power Platform admin center under the environment's details.",
+            "title": "Environment Url",
+            "type": "string"
+          },
+          "environment_id": {
+            "default": "",
+            "description": "Your Power Platform environment ID (a GUID), used for the flow-runs REST API. Found in the Power Platform admin center under the environment's details.",
+            "title": "Environment Id",
+            "type": "string"
+          },
+          "label": {
+            "default": "",
+            "description": "Optional friendly name for this environment connection.",
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "title": "ConnectPowerAutomateParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "connected": {
+            "default": false,
+            "title": "Connected",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          },
+          "environment_url": {
+            "default": "",
+            "title": "Environment Url",
+            "type": "string"
+          }
+        },
+        "title": "ProviderConnection",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.connect_power_automate",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "list_connections",
+      "description": "List the Power Platform environments currently connected.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "Explicit empty params model -- V17 disallows untyped handlers.",
+        "properties": {},
+        "title": "NoParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "ProviderConnection": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "title": {
+                "default": "",
+                "title": "Title",
+                "type": "string"
+              },
+              "kind": {
+                "default": "",
+                "title": "Kind",
+                "type": "string"
+              },
+              "subtitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subtitle"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Status"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Url"
+              },
+              "connected": {
+                "default": false,
+                "title": "Connected",
+                "type": "boolean"
+              },
+              "detail": {
+                "default": "",
+                "title": "Detail",
+                "type": "string"
+              },
+              "environment_url": {
+                "default": "",
+                "title": "Environment Url",
+                "type": "string"
+              }
+            },
+            "title": "ProviderConnection",
+            "type": "object",
+            "x-sdl": "entity"
+          }
+        },
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/ProviderConnection"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "ProviderConnectionList",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "disconnect_power_automate",
+      "description": "Disconnect one Power Platform environment: deletes its saved Azure AD credentials. Existing flows and their runs in that environment are not affected -- only Webbee's access to them is removed.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.provider.disconnected"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "description": "Connection id to disconnect, from list_connections.",
+            "title": "Connection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id"
+        ],
+        "title": "DisconnectPowerAutomateParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "DeleteResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.disconnect_power_automate",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "list_flows",
+      "description": "List cloud flows (Solution-aware) in a connected Power Platform environment, via the Dataverse Web API. Personal unattached \"My Flows\" are not returned -- Microsoft's Web API does not expose them.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Filter by state: 'draft', 'activated', or 'suspended'. Omit for all.",
+            "title": "State"
+          },
+          "search": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional name substring filter.",
+            "title": "Search"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Max flows to return.",
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "ListFlowsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "PowerAutomateFlow": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "kind": {
+                "default": "",
+                "title": "Kind",
+                "type": "string"
+              },
+              "subtitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subtitle"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Url"
+              },
+              "name": {
+                "default": "",
+                "title": "Name",
+                "type": "string"
+              },
+              "unique_name": {
+                "default": "",
+                "title": "Unique Name",
+                "type": "string"
+              },
+              "state": {
+                "default": "",
+                "title": "State",
+                "type": "string"
+              },
+              "category": {
+                "default": "",
+                "title": "Category",
+                "type": "string"
+              },
+              "created_on": {
+                "default": "",
+                "title": "Created On",
+                "type": "string"
+              },
+              "modified_on": {
+                "default": "",
+                "title": "Modified On",
+                "type": "string"
+              },
+              "solution_aware": {
+                "default": true,
+                "title": "Solution Aware",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "title": "PowerAutomateFlow",
+            "type": "object",
+            "x-sdl": "entity"
+          }
+        },
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/PowerAutomateFlow"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "PowerAutomateFlowList",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "get_flow",
+      "description": "Read one cloud flow in full from the Dataverse Web API.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_id": {
+            "description": "Dataverse workflowid (GUID) of the flow.",
+            "title": "Workflow Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow_id"
+        ],
+        "title": "GetFlowParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "unique_name": {
+            "default": "",
+            "title": "Unique Name",
+            "type": "string"
+          },
+          "state": {
+            "default": "",
+            "title": "State",
+            "type": "string"
+          },
+          "category": {
+            "default": "",
+            "title": "Category",
+            "type": "string"
+          },
+          "created_on": {
+            "default": "",
+            "title": "Created On",
+            "type": "string"
+          },
+          "modified_on": {
+            "default": "",
+            "title": "Modified On",
+            "type": "string"
+          },
+          "solution_aware": {
+            "default": true,
+            "title": "Solution Aware",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "PowerAutomateFlow",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "create_flow",
+      "description": "Create a new Solution-aware cloud flow in the Dataverse `workflow` table. clientdata must be valid Power Automate flow definition JSON (the format Power Automate itself exports/imports) -- this connector does not validate its internal shape, only that it is well-formed JSON. New flows are created in Draft state; call set_flow_state to activate.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow.created"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name for the new flow.",
+            "title": "Name",
+            "type": "string"
+          },
+          "clientdata": {
+            "description": "String-encoded JSON of the flow definition and its connectionReferences (the same shape the Power Automate designer produces). Must be a valid, complete flow definition.",
+            "title": "Clientdata",
+            "type": "string"
+          },
+          "activate": {
+            "default": false,
+            "description": "Create the flow already turned on (Activated) instead of Draft.",
+            "title": "Activate",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "clientdata"
+        ],
+        "title": "CreateFlowParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "unique_name": {
+            "default": "",
+            "title": "Unique Name",
+            "type": "string"
+          },
+          "state": {
+            "default": "",
+            "title": "State",
+            "type": "string"
+          },
+          "category": {
+            "default": "",
+            "title": "Category",
+            "type": "string"
+          },
+          "created_on": {
+            "default": "",
+            "title": "Created On",
+            "type": "string"
+          },
+          "modified_on": {
+            "default": "",
+            "title": "Modified On",
+            "type": "string"
+          },
+          "solution_aware": {
+            "default": true,
+            "title": "Solution Aware",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "PowerAutomateFlow",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.create_flow",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "update_flow",
+      "description": "Update selected fields of an existing cloud flow (name, description, and/or its clientdata definition) without touching omitted fields.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow.updated"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_id": {
+            "description": "Dataverse workflowid (GUID) of the flow.",
+            "title": "Workflow Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New display name.",
+            "title": "Name"
+          },
+          "clientdata": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New string-encoded JSON flow definition, replacing the current one.",
+            "title": "Clientdata"
+          }
+        },
+        "required": [
+          "workflow_id"
+        ],
+        "title": "UpdateFlowParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "unique_name": {
+            "default": "",
+            "title": "Unique Name",
+            "type": "string"
+          },
+          "state": {
+            "default": "",
+            "title": "State",
+            "type": "string"
+          },
+          "category": {
+            "default": "",
+            "title": "Category",
+            "type": "string"
+          },
+          "created_on": {
+            "default": "",
+            "title": "Created On",
+            "type": "string"
+          },
+          "modified_on": {
+            "default": "",
+            "title": "Modified On",
+            "type": "string"
+          },
+          "solution_aware": {
+            "default": true,
+            "title": "Solution Aware",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "PowerAutomateFlow",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.update_flow",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "delete_flow",
+      "description": "Permanently delete a cloud flow from Dataverse. Cannot be undone.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow.deleted"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_id": {
+            "description": "Dataverse workflowid (GUID) of the flow to permanently delete.",
+            "title": "Workflow Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow_id"
+        ],
+        "title": "DeleteFlowParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "DeleteResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.delete_flow",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "set_flow_state",
+      "description": "Turn a cloud flow on (activated) or off (suspended/draft) by setting its Dataverse statecode/statuscode.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow.state_changed"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_id": {
+            "description": "Dataverse workflowid (GUID) of the flow.",
+            "title": "Workflow Id",
+            "type": "string"
+          },
+          "state": {
+            "description": "Target state: 'activated' (turn on) or 'suspended' (turn off).",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow_id",
+          "state"
+        ],
+        "title": "SetFlowStateParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "FlowActionResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.set_flow_state",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "list_flow_runs",
+      "description": "List recent runs of a cloud flow, via the Power Platform REST API (a separate, newer surface from the Dataverse Web API used for the flow definition itself).",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_id": {
+            "description": "Dataverse workflowid (GUID) of the flow whose runs to list.",
+            "title": "Workflow Id",
+            "type": "string"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Max runs to return.",
+            "maximum": 200,
+            "minimum": 1,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "workflow_id"
+        ],
+        "title": "ListFlowRunsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "PowerAutomateFlowRun": {
+            "properties": {
+              "id": {
+                "default": "",
+                "title": "Id",
+                "type": "string"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "kind": {
+                "default": "",
+                "title": "Kind",
+                "type": "string"
+              },
+              "subtitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subtitle"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "status": {
+                "default": "",
+                "title": "Status",
+                "type": "string"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Url"
+              },
+              "workflow_id": {
+                "default": "",
+                "title": "Workflow Id",
+                "type": "string"
+              },
+              "start_time": {
+                "default": "",
+                "title": "Start Time",
+                "type": "string"
+              },
+              "end_time": {
+                "default": "",
+                "title": "End Time",
+                "type": "string"
+              },
+              "error": {
+                "default": "",
+                "title": "Error",
+                "type": "string"
+              }
+            },
+            "required": [
+              "title"
+            ],
+            "title": "PowerAutomateFlowRun",
+            "type": "object",
+            "x-sdl": "entity"
+          }
+        },
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/PowerAutomateFlowRun"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "PowerAutomateFlowRunList",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "get_flow_run",
+      "description": "Get details of one flow run by id, via the Power Platform REST API.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "run_id": {
+            "description": "Flow run id, from list_flow_runs.",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "GetFlowRunParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "default": "",
+            "title": "Status",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "workflow_id": {
+            "default": "",
+            "title": "Workflow Id",
+            "type": "string"
+          },
+          "start_time": {
+            "default": "",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "default": "",
+            "title": "End Time",
+            "type": "string"
+          },
+          "error": {
+            "default": "",
+            "title": "Error",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "PowerAutomateFlowRun",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "cancel_flow_run",
+      "description": "Cancel a currently running flow run.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow_run.cancelled"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "run_id": {
+            "description": "Flow run id to cancel, from list_flow_runs.",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "CancelFlowRunParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "FlowRunActionResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.cancel_flow_run",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "resubmit_flow_run",
+      "description": "Resubmit (re-run) a flow run with the same trigger inputs it originally received.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow_run.resubmitted"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "run_id": {
+            "description": "Flow run id to resubmit (re-run with the same trigger inputs), from list_flow_runs.",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "title": "ResubmitFlowRunParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "default": "",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "ok": {
+            "default": true,
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "",
+            "title": "Detail",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "FlowRunActionResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.resubmit_flow_run",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "bulk_set_flow_state",
+      "description": "Turn multiple cloud flows on/off in one call -- a value-add convenience this connector adds on top of Microsoft's API, which has no native bulk-state endpoint. Applies set_flow_state to each workflow_id in turn and reports success/failure per item.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow.bulk_state_changed"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_ids": {
+            "description": "Explicit Dataverse workflowids (GUIDs); 1-100, never inferred.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Workflow Ids",
+            "type": "array"
+          },
+          "state": {
+            "description": "Target state for every listed flow: 'activated' (turn on) or 'suspended' (turn off).",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workflow_ids",
+          "state"
+        ],
+        "title": "BulkSetFlowStateParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "BulkFlowResultItem": {
+            "properties": {
+              "id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "title": "Id"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "kind": {
+                "default": "",
+                "title": "Kind",
+                "type": "string"
+              },
+              "subtitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subtitle"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Status"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Url"
+              },
+              "workflow_id": {
+                "default": "",
+                "title": "Workflow Id",
+                "type": "string"
+              },
+              "ok": {
+                "default": true,
+                "title": "Ok",
+                "type": "boolean"
+              },
+              "error": {
+                "default": "",
+                "title": "Error",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ],
+            "title": "BulkFlowResultItem",
+            "type": "object",
+            "x-sdl": "entity"
+          }
+        },
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/BulkFlowResultItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "succeeded": {
+            "default": 0,
+            "title": "Succeeded",
+            "type": "integer"
+          },
+          "failed": {
+            "default": 0,
+            "title": "Failed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "BulkFlowResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.bulk_set_flow_state",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    },
+    {
+      "name": "bulk_delete_flows",
+      "description": "Permanently delete multiple cloud flows in one call -- a value-add convenience this connector adds on top of Microsoft's API, which has no native bulk-delete endpoint. Deletes each workflow_id in turn and reports success/failure per item. This cannot be undone.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "power_automate.flow.bulk_deleted"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Which connected environment to use. Omit if only one is connected.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "workflow_ids": {
+            "description": "Explicit Dataverse workflowids (GUIDs) to permanently delete; 1-100, never inferred.",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Workflow Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "workflow_ids"
+        ],
+        "title": "BulkDeleteFlowsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "BulkFlowResultItem": {
+            "properties": {
+              "id": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ],
+                "title": "Id"
+              },
+              "title": {
+                "title": "Title",
+                "type": "string"
+              },
+              "kind": {
+                "default": "",
+                "title": "Kind",
+                "type": "string"
+              },
+              "subtitle": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Subtitle"
+              },
+              "description": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Description"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Status"
+              },
+              "url": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null,
+                "title": "Url"
+              },
+              "workflow_id": {
+                "default": "",
+                "title": "Workflow Id",
+                "type": "string"
+              },
+              "ok": {
+                "default": true,
+                "title": "Ok",
+                "type": "boolean"
+              },
+              "error": {
+                "default": "",
+                "title": "Error",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "title"
+            ],
+            "title": "BulkFlowResultItem",
+            "type": "object",
+            "x-sdl": "entity"
+          }
+        },
+        "properties": {
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              }
+            ],
+            "title": "Id"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "kind": {
+            "default": "",
+            "title": "Kind",
+            "type": "string"
+          },
+          "subtitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Subtitle"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Description"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Url"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/$defs/BulkFlowResultItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "succeeded": {
+            "default": 0,
+            "title": "Succeeded",
+            "type": "integer"
+          },
+          "failed": {
+            "default": 0,
+            "title": "Failed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "title": "BulkFlowResult",
+        "type": "object",
+        "x-sdl": "entity"
+      },
+      "event": "power-automate-connector.bulk_delete_flows",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "power_automate"
+    }
+  ],
+  "signals": [],
+  "schedules": [],
+  "required_scopes": [],
+  "icon_size_bytes": 316,
+  "lifecycle": {
+    "health_check": {
+      "interval_sec": 60
+    }
+  },
+  "secrets": [
+    {
+      "name": "power_automate_connections",
+      "description": "Your connected Power Platform environments -- stored as a JSON array, one entry per environment (Dev/Test/Prod etc), each with its own Azure AD App Registration (tenant_id, client_id, client_secret) and Dataverse environment_url/environment_id. Managed through connect_power_automate / disconnect_power_automate -- you should not need to edit this directly.",
+      "required": true,
+      "write_mode": "both",
+      "max_bytes": 65536,
+      "scope": "user",
+      "rotation_hint_days": 180
+    }
+  ],
+  "panels": [
+    {
+      "panel_id": "secrets",
+      "slot": "right",
+      "title": "Secrets",
+      "tree": {},
+      "icon": "KeyRound",
+      "refresh": "manual",
+      "center_overlay": false
+    },
+    {
+      "panel_id": "power_automate_connect",
+      "slot": "left",
+      "title": "Power Automate",
+      "tree": {},
+      "icon": "🔗",
+      "refresh": "manual",
+      "center_overlay": false,
+      "default_width": 320,
+      "min_width": 260,
+      "max_width": 420
+    },
+    {
+      "panel_id": "power_automate_connect_help",
+      "slot": "center",
+      "title": "How to connect Power Automate",
+      "tree": {},
+      "icon": "",
+      "refresh": "manual",
+      "center_overlay": true
+    }
+  ]
+}
