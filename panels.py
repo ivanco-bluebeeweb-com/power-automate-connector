@@ -80,15 +80,16 @@ def _flows_section(flows: list) -> ui.UINode:
 
 
 def _connect_section() -> ui.UINode:
-    """Plain content, no Card wrapper."""
-    return ui.Stack(direction="v", gap=3, align="start", children=[
+    """Plain content, no Card wrapper. Stretched full-width per
+    UI_INTERFACE_STANDARD.md (2026-08-20); the \"Solution-aware flows
+    only\" limitation lives ONLY in power_automate_connect_help's modal
+    now -- repeating it here would duplicate that instruction."""
+    return ui.Stack(direction="v", gap=3, align="stretch", children=[
         ui.Text("Connect Power Automate", variant="heading"),
         ui.Text(
             "This connects to your Dataverse environment via your own "
             "Azure AD App Registration -- Imperal never sees or stores "
-            "your Microsoft account password. Only manages Solution-aware "
-            "cloud flows; personal unattached \"My Flows\" aren't reachable "
-            "through Microsoft's own API.",
+            "your Microsoft account password.",
             variant="caption",
         ),
         ui.Button("How do I set this up?", variant="ghost", size="sm",
@@ -98,18 +99,18 @@ def _connect_section() -> ui.UINode:
             action="connect_power_automate",
             submit_label="Verify and connect",
             children=[
-                ui.Input(param_name="tenant_id",
+                ui.Input(param_name="tenant_id", label="Azure AD tenant ID",
                           placeholder="Azure AD tenant ID"),
-                ui.Input(param_name="client_id",
+                ui.Input(param_name="client_id", label="App Registration client ID",
                           placeholder="App Registration client ID"),
-                ui.Password(param_name="client_secret",
+                ui.Password(param_name="client_secret", label="App Registration client secret",
                              placeholder="App Registration client secret"),
-                ui.Input(param_name="environment_url",
+                ui.Input(param_name="environment_url", label="Environment URL",
                           placeholder="https://org12345.crm.dynamics.com"),
-                ui.Input(param_name="environment_id",
+                ui.Input(param_name="environment_id", label="Environment ID",
                           placeholder="Environment ID (GUID)"),
-                ui.Input(param_name="label",
-                          placeholder="Label (optional, e.g. Production)"),
+                ui.Input(param_name="label", label="Label (optional)",
+                          placeholder="e.g. Production"),
             ],
         ),
     ])
@@ -125,7 +126,7 @@ async def power_automate_connect_panel(ctx, **kwargs) -> object:
                         subtitle="Manage your Power Platform cloud flows from Imperal")
 
     if not connected:
-        return ui.Stack(direction="v", gap=4, align="start", children=[
+        return ui.Stack(direction="v", gap=4, align="stretch", children=[
             header,
             _connect_section(),
             ui.Alert(
@@ -150,7 +151,7 @@ async def power_automate_connect_panel(ctx, **kwargs) -> object:
     except pac.ClientFail:
         flows = []
 
-    return ui.Stack(direction="v", gap=4, align="start", children=[
+    return ui.Stack(direction="v", gap=4, align="stretch", children=[
         header,
         ui.Text("Connected environments", variant="subtitle"),
         _connections_section(connections),
