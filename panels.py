@@ -165,6 +165,9 @@ async def power_automate_connect_panel(ctx, **kwargs) -> object:
         ui.Text(f"Flows -- {first.get('label') or first.get('environment_url', '')}", variant="subtitle"),
         _flows_section(flows),
         ui.Divider(),
+        ui.Button("View flow overview", variant="primary", size="sm", full_width=True,
+                  icon="LayoutDashboard", on_click=ui.Call("__panel__power_automate_center")),
+        ui.Divider(),
         _settings_button(),
     ])
 
@@ -215,7 +218,30 @@ async def power_automate_center_panel(ctx, **kwargs) -> object:
     empty (not a caching issue) until center_overlay=True is set. Text is
     the shared canonical wording -- must stay identical across every app
     in this situation, not app-specific."""
-    return ui.Empty(
-        message="Nothing to show here -- this app is managed entirely from the sidebar.",
-        icon="👈",
-    )
+    connections = await h._load_connections(ctx)
+    if not connections:
+        return ui.Empty(message="Connect a Power Platform environment from the sidebar to see it here.", icon="🔗")
+
+    from schemas import ListFlowsParams
+    conn_id = connections[0].get("id", "")
+    result = await h.list_flows(ctx, ListFlowsParams(connection_id=conn_id))
+    body: list[ui.UINode] = [ui.Text("Flow overview", variant="subtitle")]
+    if result.success and result.data and result.data.items:
+        items = result.data.items
+        active = sum(1 for f in items if f.state == "activated")
+        suspended = sum(1 for f in items if f.state == "suspended")
+        body.append(ui.Stats(children=[
+            ui.Stat(label="Total", value=str(len(items))),
+            ui.Stat(label="Activated", value=str(active)),
+            ui.Stat(label="Suspended", value=str(suspended)),
+        ]))
+        for f in items[:15]:
+            color = {"activated": "green", "suspended": "red"}.get(f.state, "gray")
+            body.append(ui.Stack(direction="h", gap=2, align="center", children=[
+                ui.Badge(label=(f.state or "draft").upper(), color=color),
+                ui.Text(f.title, variant="body"),
+            ]))
+    else:
+        body.append(ui.Text("No flows found, or not yet connected.", variant="caption"))
+
+    return ui.Stack(direction="v", gap=3, align="stretch", children=body)
