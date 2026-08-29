@@ -1,0 +1,17 @@
+{
+  "bulk_delete_flows": 60,
+  "bulk_set_flow_state": 40,
+  "cancel_flow_run": 16,
+  "connect_power_automate": 0,
+  "create_flow": 16,
+  "delete_flow": 20,
+  "disconnect_power_automate": 0,
+  "get_flow": 8,
+  "get_flow_run": 8,
+  "list_connections": 0,
+  "list_flow_runs": 8,
+  "list_flows": 8,
+  "resubmit_flow_run": 16,
+  "set_flow_state": 16,
+  "update_flow": 16
+}

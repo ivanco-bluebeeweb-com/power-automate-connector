@@ -1,6 +1,6 @@
 {
   "manifest_schema_version": 3,
-  "sdk_version": "5.9.22",
+  "sdk_version": "5.13.0",
   "app_id": "power-automate-connector",
   "version": "0.1.0",
   "name": "Power Automate",
@@ -258,17 +258,12 @@
         },
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "integer"
-              }
-            ],
-            "title": "Id"
+            "default": "provider_connection_list",
+            "title": "Id",
+            "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -333,10 +328,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "id",
-          "title"
-        ],
         "title": "ProviderConnectionList",
         "type": "object",
         "x-sdl": "entity"
@@ -378,6 +369,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -440,9 +432,6 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "DeleteResult",
         "type": "object",
         "x-sdl": "entity"
@@ -516,6 +505,7 @@
                 "type": "string"
               },
               "title": {
+                "default": "",
                 "title": "Title",
                 "type": "string"
               },
@@ -601,9 +591,6 @@
                 "type": "boolean"
               }
             },
-            "required": [
-              "title"
-            ],
             "title": "PowerAutomateFlow",
             "type": "object",
             "x-sdl": "entity"
@@ -611,17 +598,12 @@
         },
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "integer"
-              }
-            ],
-            "title": "Id"
+            "default": "power_automate_flow_list",
+            "title": "Id",
+            "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -686,10 +668,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "id",
-          "title"
-        ],
         "title": "PowerAutomateFlowList",
         "type": "object",
         "x-sdl": "entity"
@@ -735,6 +713,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -820,9 +799,6 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "PowerAutomateFlow",
         "type": "object",
         "x-sdl": "entity"
@@ -882,6 +858,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -967,9 +944,6 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "PowerAutomateFlow",
         "type": "object",
         "x-sdl": "entity"
@@ -1043,6 +1017,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1128,9 +1103,6 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "PowerAutomateFlow",
         "type": "object",
         "x-sdl": "entity"
@@ -1144,7 +1116,7 @@
     {
       "name": "delete_flow",
       "description": "Permanently delete a cloud flow from Dataverse. Cannot be undone.",
-      "action_type": "write",
+      "action_type": "destructive",
       "chain_callable": true,
       "effects": [
         "power_automate.flow.deleted"
@@ -1178,6 +1150,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1240,9 +1213,6 @@
             "type": "boolean"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "DeleteResult",
         "type": "object",
         "x-sdl": "entity"
@@ -1296,6 +1266,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1363,9 +1334,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "FlowActionResult",
         "type": "object",
         "x-sdl": "entity"
@@ -1421,6 +1389,7 @@
                 "type": "string"
               },
               "title": {
+                "default": "",
                 "title": "Title",
                 "type": "string"
               },
@@ -1491,9 +1460,6 @@
                 "type": "string"
               }
             },
-            "required": [
-              "title"
-            ],
             "title": "PowerAutomateFlowRun",
             "type": "object",
             "x-sdl": "entity"
@@ -1501,17 +1467,12 @@
         },
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "integer"
-              }
-            ],
-            "title": "Id"
+            "default": "power_automate_flow_run_list",
+            "title": "Id",
+            "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1576,10 +1537,6 @@
             "type": "array"
           }
         },
-        "required": [
-          "id",
-          "title"
-        ],
         "title": "PowerAutomateFlowRunList",
         "type": "object",
         "x-sdl": "entity"
@@ -1625,6 +1582,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1695,9 +1653,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "PowerAutomateFlowRun",
         "type": "object",
         "x-sdl": "entity"
@@ -1745,6 +1700,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1812,9 +1768,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "FlowRunActionResult",
         "type": "object",
         "x-sdl": "entity"
@@ -1862,6 +1815,7 @@
             "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -1929,9 +1883,6 @@
             "type": "string"
           }
         },
-        "required": [
-          "title"
-        ],
         "title": "FlowRunActionResult",
         "type": "object",
         "x-sdl": "entity"
@@ -1987,17 +1938,12 @@
           "BulkFlowResultItem": {
             "properties": {
               "id": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "integer"
-                  }
-                ],
-                "title": "Id"
+                "default": "",
+                "title": "Id",
+                "type": "string"
               },
               "title": {
+                "default": "",
                 "title": "Title",
                 "type": "string"
               },
@@ -2070,10 +2016,6 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "title"
-            ],
             "title": "BulkFlowResultItem",
             "type": "object",
             "x-sdl": "entity"
@@ -2081,17 +2023,12 @@
         },
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "integer"
-              }
-            ],
-            "title": "Id"
+            "default": "bulk_flow_result",
+            "title": "Id",
+            "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -2166,10 +2103,6 @@
             "type": "integer"
           }
         },
-        "required": [
-          "id",
-          "title"
-        ],
         "title": "BulkFlowResult",
         "type": "object",
         "x-sdl": "entity"
@@ -2183,7 +2116,7 @@
     {
       "name": "bulk_delete_flows",
       "description": "Permanently delete multiple cloud flows in one call -- a value-add convenience this connector adds on top of Microsoft's API, which has no native bulk-delete endpoint. Deletes each workflow_id in turn and reports success/failure per item. This cannot be undone.",
-      "action_type": "write",
+      "action_type": "destructive",
       "chain_callable": true,
       "effects": [
         "power_automate.flow.bulk_deleted"
@@ -2219,17 +2152,12 @@
           "BulkFlowResultItem": {
             "properties": {
               "id": {
-                "anyOf": [
-                  {
-                    "type": "string"
-                  },
-                  {
-                    "type": "integer"
-                  }
-                ],
-                "title": "Id"
+                "default": "",
+                "title": "Id",
+                "type": "string"
               },
               "title": {
+                "default": "",
                 "title": "Title",
                 "type": "string"
               },
@@ -2302,10 +2230,6 @@
                 "type": "string"
               }
             },
-            "required": [
-              "id",
-              "title"
-            ],
             "title": "BulkFlowResultItem",
             "type": "object",
             "x-sdl": "entity"
@@ -2313,17 +2237,12 @@
         },
         "properties": {
           "id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "integer"
-              }
-            ],
-            "title": "Id"
+            "default": "bulk_flow_result",
+            "title": "Id",
+            "type": "string"
           },
           "title": {
+            "default": "",
             "title": "Title",
             "type": "string"
           },
@@ -2398,10 +2317,6 @@
             "type": "integer"
           }
         },
-        "required": [
-          "id",
-          "title"
-        ],
         "title": "BulkFlowResult",
         "type": "object",
         "x-sdl": "entity"
@@ -2461,6 +2376,24 @@
       "title": "How to connect Power Automate",
       "tree": {},
       "icon": "",
+      "refresh": "manual",
+      "center_overlay": true
+    },
+    {
+      "panel_id": "power_automate_center",
+      "slot": "center",
+      "title": "Power Automate",
+      "tree": {},
+      "icon": "🔗",
+      "refresh": "manual",
+      "center_overlay": true
+    },
+    {
+      "panel_id": "power_automate_settings",
+      "slot": "center",
+      "title": "App settings",
+      "tree": {},
+      "icon": "⚙️",
       "refresh": "manual",
       "center_overlay": true
     }
