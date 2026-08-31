@@ -513,7 +513,7 @@ async def get_flow_run(ctx, params: GetFlowRunParams) -> ActionResult:
         r = await pac.get_flow_run(ctx, token, conn["environment_id"], params.run_id)
     except pac.ClientFail as e:
         return ActionResult.error(e.payload["error"], code=e.payload["error_code"], retryable=e.payload.get("retryable", False))
-    return ActionResult.success(_run_entity(r, r.get("properties", r).get("workflow", {}).get("name", "")))
+    return ActionResult.success(_run_entity(r, r.get("properties", r).get("workflow", {}).get("name", "")), summary="Flow run retrieved.")
 
 
 @chat.function(
