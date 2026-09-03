@@ -34,8 +34,7 @@ def _settings_button() -> ui.UINode:
     """The one required secondary entry point into the settings screen --
     always the last element at the bottom of the sidebar."""
     return ui.Button(
-        "App settings", variant="secondary", size="sm", full_width=True,
-        icon="settings", on_click=ui.Call("__panel__power_automate_settings"),
+        "App settings", variant="secondary", size="sm", icon="settings", on_click=ui.Call("__panel__power_automate_settings"),
     )
 
 
@@ -165,8 +164,7 @@ async def power_automate_connect_panel(ctx, **kwargs) -> object:
         ui.Text(f"Flows -- {first.get('label') or first.get('environment_url', '')}", variant="subtitle"),
         _flows_section(flows),
         ui.Divider(),
-        ui.Button("View flow overview", variant="primary", size="sm", full_width=True,
-                  icon="LayoutDashboard", on_click=ui.Call("__panel__power_automate_center")),
+        ui.Button("View flow overview", variant="primary", size="sm", icon="LayoutDashboard", on_click=ui.Call("__panel__power_automate_center")),
         ui.Divider(),
         _settings_button(),
     ])
